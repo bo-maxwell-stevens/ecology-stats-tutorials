@@ -13,10 +13,14 @@ counts <- read_tsv(input_file, show_col_types = FALSE)
 sample_ids <- counts[[1]]
 count_matrix <- as.matrix(counts[, -1])
 storage.mode(count_matrix) <- "numeric"
+if (any(!is.finite(count_matrix)) || any(count_matrix < 0)) stop("Count table must contain finite, non-negative values.")
 
 # iNEXT expects a list of species-abundance vectors, one vector per sample.
 sample_list <- lapply(seq_len(nrow(count_matrix)), function(i) count_matrix[i, count_matrix[i, ] > 0])
 names(sample_list) <- sample_ids
+nonempty <- lengths(sample_list) > 0
+if (any(!nonempty)) write_csv(data.frame(sample_id = sample_ids[!nonempty], reason = "zero_reads"), "Outputs/Diversity/ITS_inext_zero_read_excluded.csv")
+sample_list <- sample_list[nonempty]
 
 # The endpoint is twice each sample's observed read depth. Samples that do not
 # reach 90% coverage are recorded as missing rather than silently extrapolated.
@@ -32,7 +36,7 @@ results <- lapply(names(sample_list), function(id) {
   data.frame(sample_id = id, richness_at_90_coverage = first$qD, reaches_target = TRUE)
 })
 coverage_results <- do.call(rbind, results)
-observed_richness <- data.frame(sample_id = sample_ids, observed_richness = lengths(sample_list))
+observed_richness <- data.frame(sample_id = names(sample_list), observed_richness = lengths(sample_list))
 coverage_results <- merge(coverage_results, observed_richness, by = "sample_id", all.x = TRUE)
 write_csv(coverage_results, output_file)
 

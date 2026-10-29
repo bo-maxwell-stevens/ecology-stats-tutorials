@@ -24,6 +24,7 @@ output_folder = Path("Outputs/Ordination")
 community_files = {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}
 colour_variable = "pH_KCl"  # Other real numeric choice: P_Mehlich3_mg_100g
 random_seed = 42
+aggregate_to_site = True  # Required for supplied site-level metadata; do not assume .N samples are technical replicates.
 
 # =====================================================
 # STEP 1: Load metadata and align samples
@@ -34,12 +35,20 @@ sns.set_theme(style="whitegrid", context="talk")
 metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
 for community_name, filename in community_files.items():
     counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
-    counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
-    counts = counts.groupby("canonical").sum()  # Sum technical/within-site sequence samples before matching metadata.
+    if aggregate_to_site:
+        counts["site.id"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
+        counts = counts.groupby("site.id").sum()
+    else:
+        raise ValueError("The supplied metadata are site-level. Use sample-level metadata before setting aggregate_to_site=False.")
     shared_samples = counts.index.intersection(metadata.index)
     counts, matched_metadata = counts.loc[shared_samples], metadata.loc[shared_samples]
     matched_metadata = matched_metadata.dropna(subset=[colour_variable])
     counts = counts.loc[matched_metadata.index]
+    zero_reads = counts.sum(axis=1) == 0
+    print(f"{community_name}: {len(counts)} sites matched; {zero_reads.sum()} zero-read sites excluded.")
+    counts, matched_metadata = counts.loc[~zero_reads], matched_metadata.loc[~zero_reads]
+    if len(counts) < 3:
+        raise ValueError("At least three non-empty matched communities are required for ordination.")
 
     # =====================================================
     # STEP 2: Prepare the community table
@@ -79,8 +88,13 @@ for community_name, filename in community_files.items():
     ]:
         plot_data = coordinates.join(matched_metadata[[colour_variable]])
         figure, axis = plt.subplots(figsize=(7, 6))
-        scatter = axis.scatter(plot_data[x_column], plot_data[y_column], c=plot_data[colour_variable], cmap="viridis", s=70, edgecolor="black", linewidth=.3)
-        figure.colorbar(scatter, ax=axis, label=colour_variable)
+        if pd.api.types.is_numeric_dtype(plot_data[colour_variable]):
+            scatter = axis.scatter(plot_data[x_column], plot_data[y_column], c=plot_data[colour_variable], cmap="viridis", s=70, edgecolor="black", linewidth=.3)
+            figure.colorbar(scatter, ax=axis, label=colour_variable)
+        else:
+            for group, group_data in plot_data.groupby(colour_variable):
+                axis.scatter(group_data[x_column], group_data[y_column], label=group, s=70, edgecolor="black", linewidth=.3)
+            axis.legend(title=colour_variable, bbox_to_anchor=(1.02, 1), loc="upper left")
         axis.axhline(0, color="grey", linewidth=.7); axis.axvline(0, color="grey", linewidth=.7)
         axis.set(title=f"{community_name} {method}: coloured by {colour_variable}\n{subtitle}")
         figure.tight_layout()

@@ -8,6 +8,7 @@ MAIN STATISTIC: Regression coefficients estimate associations while holding the 
 """
 from pathlib import Path
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
@@ -44,3 +45,15 @@ axes[0].set(xlabel="Fitted values", ylabel="Residuals", title="Residuals versus 
 sm.qqplot(result.resid, line="45", ax=axes[1]); axes[1].set_title("Normal Q-Q plot")
 figure.tight_layout(); figure.savefig(output_folder / "mixed_model_diagnostics.png", dpi=300); figure.savefig(output_folder / "mixed_model_diagnostics.pdf")
 print(result.summary())
+
+# =====================================================
+# STEP 4: Synthetic repeated-measures mixed-model example
+# =====================================================
+# This artificial example demonstrates a random intercept. It is not DarkDivNet data.
+rng = np.random.default_rng(42)
+synthetic = pd.DataFrame({"site": np.repeat([f"site_{i}" for i in range(12)], 4), "pH": rng.normal(6, 0.8, 48)})
+site_intercepts = dict(zip(synthetic["site"].unique(), rng.normal(0, 1.5, 12)))
+synthetic["diversity"] = 10 + 1.2 * synthetic["pH"] + synthetic["site"].map(site_intercepts) + rng.normal(0, 1, 48)
+mixed_result = smf.mixedlm("diversity ~ pH", synthetic, groups=synthetic["site"]).fit()
+pd.DataFrame({"coefficient": mixed_result.params, "standard_error": mixed_result.bse, "p_value": mixed_result.pvalues}).to_csv(output_folder / "synthetic_mixed_model_coefficients.csv")
+synthetic.to_csv(output_folder / "synthetic_repeated_measures_data.csv", index=False)

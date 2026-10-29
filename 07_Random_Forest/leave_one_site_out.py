@@ -9,6 +9,9 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
@@ -28,17 +31,18 @@ data = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").dropn
 X, y, groups = data[predictor_columns], data[response_variable], data[group_column]
 predictions = []
 for train_index, test_index in LeaveOneGroupOut().split(X, y, groups):
-    # Imputation is fit only on the current training sites, preventing leakage.
-    imputer = SimpleImputer(strategy="median"); X_train = imputer.fit_transform(X.iloc[train_index]); X_test = imputer.transform(X.iloc[test_index])
-    forest = RandomForestRegressor(n_estimators=500, min_samples_leaf=2, random_state=random_seed, n_jobs=-1)
-    forest.fit(X_train, y.iloc[train_index])
-    predictions.append(pd.DataFrame({"site": groups.iloc[test_index].values, "observed": y.iloc[test_index].values, "predicted": forest.predict(X_test)}))
+    numeric = X.select_dtypes(include="number").columns.tolist()
+    categorical = [column for column in predictor_columns if column not in numeric]
+    preprocess = ColumnTransformer([("numeric", SimpleImputer(strategy="median"), numeric), ("categorical", Pipeline([("impute", SimpleImputer(strategy="most_frequent")), ("one_hot", OneHotEncoder(handle_unknown="ignore"))]), categorical)])
+    forest = Pipeline([("preprocess", preprocess), ("forest", RandomForestRegressor(n_estimators=500, min_samples_leaf=2, random_state=random_seed, n_jobs=-1))])
+    forest.fit(X.iloc[train_index], y.iloc[train_index])
+    predictions.append(pd.DataFrame({"site": groups.iloc[test_index].values, "observed": y.iloc[test_index].values, "predicted": forest.predict(X.iloc[test_index]), "baseline_prediction": y.iloc[train_index].mean()}))
 all_predictions = pd.concat(predictions, ignore_index=True)
 
 # =====================================================
 # STEP 2: Report pooled performance and plot it
 # =====================================================
-metrics = pd.DataFrame([{"n_sites": groups.nunique(), "n_observations": len(data), "pooled_R2": r2_score(all_predictions.observed, all_predictions.predicted), "pooled_RMSE": mean_squared_error(all_predictions.observed, all_predictions.predicted) ** .5, "pooled_MAE": mean_absolute_error(all_predictions.observed, all_predictions.predicted)}])
+metrics = pd.DataFrame([{"model": "random_forest", "n_sites": groups.nunique(), "n_observations": len(data), "pooled_R2": r2_score(all_predictions.observed, all_predictions.predicted), "pooled_RMSE": mean_squared_error(all_predictions.observed, all_predictions.predicted) ** .5, "pooled_MAE": mean_absolute_error(all_predictions.observed, all_predictions.predicted)}, {"model": "training_mean_baseline", "n_sites": groups.nunique(), "n_observations": len(data), "pooled_R2": r2_score(all_predictions.observed, all_predictions.baseline_prediction), "pooled_RMSE": mean_squared_error(all_predictions.observed, all_predictions.baseline_prediction) ** .5, "pooled_MAE": mean_absolute_error(all_predictions.observed, all_predictions.baseline_prediction)}])
 all_predictions.to_csv(output_folder / "leave_one_site_out_predictions.csv", index=False); metrics.to_csv(output_folder / "leave_one_site_out_metrics.csv", index=False)
 figure, axis = plt.subplots(figsize=(6, 6)); axis.scatter(all_predictions.observed, all_predictions.predicted)
 limits = [min(all_predictions.observed.min(), all_predictions.predicted.min()), max(all_predictions.observed.max(), all_predictions.predicted.max())]; axis.plot(limits, limits, "--", color="black")

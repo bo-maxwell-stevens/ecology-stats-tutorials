@@ -1,7 +1,10 @@
-args <- commandArgs(trailingOnly = TRUE); output_folder <- args[1]; permutations <- as.integer(args[2])
+args <- commandArgs(trailingOnly = TRUE); if (length(args) != 3) stop("Expected output folder, permutations, and seed.")
+output_folder <- args[1]; permutations <- as.integer(args[2]); set.seed(as.integer(args[3]))
+if (!requireNamespace("indicspecies", quietly = TRUE) || !requireNamespace("ggplot2", quietly = TRUE)) stop("Install indicspecies and ggplot2 before running this script.")
 library(indicspecies); library(ggplot2)
 community <- read.csv(file.path(output_folder, "community_for_R.csv"), row.names = 1, check.names = FALSE)
 groups <- read.csv(file.path(output_folder, "groups_for_R.csv"), row.names = 1)$analysis_group
+if (nrow(community) != length(groups) || any(rowSums(community) <= 0) || min(table(groups)) < 2) stop("Check aligned non-empty communities and replicated groups.")
 result <- multipatt(community, groups, func = "IndVal.g", duleg = TRUE, control = how(nperm = permutations))
 table <- result$sign
 table$taxon <- rownames(table); table$FDR <- p.adjust(table$p.value, method = "BH")

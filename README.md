@@ -94,6 +94,20 @@ At the top of each script, change the `USER SETTINGS`: filenames, `response_vari
 
 Correlation is not causation. Avoid pseudoreplication: samples from one field are not automatically independent fields. Correct many taxon-level tests for multiple testing. Sequencing depth and compositional counts affect diversity and community analyses. Small samples make estimates unstable and can overfit random forests. Assess spatial autocorrelation and validate predictions without leaking held-out sites or samples into preprocessing. Correlated predictors make individual effects difficult to interpret.
 
+## Short glossary
+
+- **Richness:** number of observed taxa in a sample.
+- **Evenness:** how evenly reads are distributed among taxa.
+- **Bray-Curtis dissimilarity:** difference in community composition between two samples.
+- **NMDS stress:** mismatch between original dissimilarities and the ordination; lower is better.
+- **PERMANOVA:** permutation test for association between predictors and community composition.
+- **Pseudoreplication:** treating non-independent observations as independent replicates.
+- **Random effect:** a group-level effect used when observations are genuinely repeated within groups.
+- **Moran's I:** measure of whether nearby locations have similar values.
+- **Indicator species:** taxon statistically associated with a predefined group, not necessarily causal.
+- **Cross-validation:** evaluating predictions on observations not used to fit the model.
+- **R-squared and RMSE:** explained predictive variation and prediction error in response units.
+
 ## Reproducibility
 
 All scripts set a random seed and save CSV results plus 300 dpi PNG and PDF figures under `Outputs/`. The verified example outputs are versioned; raw input tables remain excluded. Package versions are bounded in `requirements.txt`; record the exact environment with `pip freeze > requirements-lock.txt` for a publication.

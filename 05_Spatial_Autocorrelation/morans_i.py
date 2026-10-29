@@ -12,13 +12,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from libpysal.weights import KNN
 from esda import Moran
+from pyproj import Transformer
 
 # =====================================================
 # USER SETTINGS
 # =====================================================
 data_folder = Path("Data"); output_folder = Path("Outputs/Spatial")
 variables_to_test = ["ITS_richness", "AMF_richness", "pH_KCl"]
-number_of_neighbours = 5
+number_of_neighbours = 6
+sensitivity_neighbours = [4, 6, 8]
 permutations = 999
 random_seed = 42
 
@@ -32,30 +34,33 @@ for community, filename in {"ITS": "ITS_OTU_table_final.tsv", "AMF": "AMF_OTU_ta
     counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
     counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
     counts = counts.groupby("canonical").sum()
+    counts = counts.loc[counts.sum(axis=1) > 0]
     metadata[f"{community}_richness"] = (counts > 0).sum(axis=1)
 
 # =====================================================
 # STEP 2: Build geographic k-nearest-neighbour weights
 # =====================================================
-# Convert longitude/latitude to approximate kilometre coordinates before KNN.
+# Project WGS84 coordinates to metres (Web Mercator) before constructing KNN weights.
 coordinates = metadata[["lat", "lon"]].copy()
-coordinates["x_km"] = coordinates["lon"] * 111 * np.cos(np.deg2rad(coordinates["lat"]))
-coordinates["y_km"] = coordinates["lat"] * 111
+transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+coordinates["x_m"], coordinates["y_m"] = transformer.transform(coordinates["lon"].to_numpy(), coordinates["lat"].to_numpy())
 results = []
 for variable in variables_to_test:
-    table = metadata[[variable]].join(coordinates[["x_km", "y_km"]]).dropna()
-    # Repeated positions have zero distance. Aggregate them rather than inventing distance with jitter.
-    table = table.groupby(["x_km", "y_km"], as_index=False)[variable].mean()
-    if len(table) <= number_of_neighbours:
+    table = metadata[[variable]].join(coordinates[["x_m", "y_m"]]).dropna()
+    # Coordinates are metadata-level sites. Duplicate positions are averaged only for this spatial summary.
+    table = table.groupby(["x_m", "y_m"], as_index=False)[variable].mean()
+    if table[variable].nunique() < 2 or len(table) <= max(sensitivity_neighbours):
         print(f"Skipped {variable}: too few unique locations for k={number_of_neighbours}."); continue
-    weights = KNN.from_array(table[["x_km", "y_km"]].to_numpy(), k=number_of_neighbours)
-    weights.transform = "r"
 
     # =====================================================
     # STEP 3: Calculate Moran's I and plot it
     # =====================================================
+    for k in sensitivity_neighbours:
+        weights = KNN.from_array(table[["x_m", "y_m"]].to_numpy(), k=k); weights.transform = "r"
+        moran = Moran(table[variable].to_numpy(), weights, permutations=permutations)
+        results.append({"variable": variable, "k_neighbours": k, "n_unique_locations": len(table), "Moran_I": moran.I, "expected_I": moran.EI, "permutation_p_value": moran.p_sim})
+    weights = KNN.from_array(table[["x_m", "y_m"]].to_numpy(), k=number_of_neighbours); weights.transform = "r"
     moran = Moran(table[variable].to_numpy(), weights, permutations=permutations)
-    results.append({"variable": variable, "n_unique_locations": len(table), "Moran_I": moran.I, "expected_I": moran.EI, "permutation_p_value": moran.p_sim})
     standardized_value = (table[variable] - table[variable].mean()) / table[variable].std()
     spatial_lag = weights.sparse @ standardized_value
     figure, axis = plt.subplots(figsize=(7, 5))
