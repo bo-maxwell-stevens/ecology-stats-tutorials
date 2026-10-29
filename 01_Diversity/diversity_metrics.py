@@ -57,7 +57,7 @@ for community_name, filename in community_files.items():
     summary = pd.DataFrame({
         "sample_id": counts.index, "community": community_name,
         "total_reads": total_reads, "observed_richness": richness,
-        "shannon": shannon, "pielou_evenness": evenness,
+        "shannon": shannon, "hill_q1_effective_taxa": np.exp(shannon), "pielou_evenness": evenness,
         "simpson": simpson, "inverse_simpson": inverse_simpson,
     })
     summary.to_csv(output_folder / f"{community_name}_diversity_summary.csv", index=False)

@@ -9,8 +9,6 @@ MAIN STATISTIC: IndVal.g combines a taxon's specificity and fidelity to a group.
 from pathlib import Path
 import subprocess
 import pandas as pd
-import numpy as np
-import numpy as np
 
 # =====================================================
 # USER SETTINGS
@@ -18,9 +16,7 @@ import numpy as np
 data_folder = Path("Data/Synthetic_Potato_Example")
 output_folder = Path("Outputs/Synthetic/Indicator_Species")
 community_type = "ITS"
-group_source_column = "pH_KCl"
-group_column = "disease_group"  # Predefined teaching group: black-dot harvest severity >= 50.
-use_teaching_median_split = False  # Illustrative only; do not use a median split as a biological threshold.
+group_column = "management"  # 24 organic and 36 conventional independent fields.
 minimum_prevalence = 0.10
 permutations = 999
 random_seed = 42
@@ -34,8 +30,7 @@ counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_
 counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
 counts = counts.groupby("canonical").sum()
 metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=True).first()
-metadata = metadata.loc[counts.index.intersection(metadata.index)].dropna(subset=[group_source_column])
-metadata["disease_group"] = np.where(metadata["Severity_Har_Cc"] >= 50, "high_black_dot", "low_black_dot")
+metadata = metadata.loc[counts.index.intersection(metadata.index)].dropna(subset=[group_column])
 counts = counts.loc[metadata.index]
 zero_reads = counts.sum(axis=1) == 0
 counts, metadata = counts.loc[~zero_reads], metadata.loc[~zero_reads]
@@ -44,15 +39,9 @@ print(f"{community_type}: {len(counts)} sites used; {zero_reads.sum()} zero-read
 # =====================================================
 # STEP 2: Define an example group and filter rare taxa
 # =====================================================
-# This pre-defined severity threshold is a teaching demonstration. Dichotomising
-# continuous severity loses information; indicator taxa are associations, not causes.
-if group_column:
-    metadata["analysis_group"] = metadata[group_column]
-elif use_teaching_median_split:
-    metadata["analysis_group"] = "low_pH"
-    metadata.loc[metadata[group_source_column] > metadata[group_source_column].median(), "analysis_group"] = "high_pH"
-else:
-    raise ValueError("Set group_column to a predefined categorical group, or explicitly enable the teaching median split.")
+# Management is predefined. Black-dot severity is continuous, so the previous
+# threshold discarded information and left an unusably small high-severity group.
+metadata["analysis_group"] = metadata[group_column]
 if metadata["analysis_group"].nunique() < 2 or metadata["analysis_group"].value_counts().min() < 2:
     raise ValueError("Indicator analysis needs at least two groups with two or more independent sites each.")
 counts = counts.loc[:, (counts > 0).mean(axis=0) >= minimum_prevalence]

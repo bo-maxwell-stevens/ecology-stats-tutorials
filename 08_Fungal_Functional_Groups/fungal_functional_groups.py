@@ -78,15 +78,20 @@ relative_abundance.sum(axis=1).rename("proportion_sum").to_csv(output_folder / "
 # =====================================================
 # STEP 4: Join environment, plot, and calculate correlations
 # =====================================================
-metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
-plot_data = relative_abundance.join(metadata[[environmental_predictor]]).dropna()
+# Soil pH is measured twice per field, so use the field mean. Other field-level
+# predictors could instead use .first() after confirming they are identical.
+field_metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=False).agg({environmental_predictor: "mean"})
+correlation_data = relative_abundance.reset_index().merge(field_metadata, on="site.id", validate="one_to_one").dropna()
+assert correlation_data["site.id"].is_unique
+print(f"Functional-group correlations use {len(correlation_data)} independent fields.")
+plot_data = correlation_data.set_index("site.id")
 plot_data.sort_values(environmental_predictor)[list(relative_abundance.columns)].plot(kind="bar", stacked=True, figsize=(12, 5), colormap="viridis", width=.9)
 plt.ylabel("Relative read abundance (of all ITS reads)"); plt.xlabel("Sample, ordered by " + environmental_predictor); plt.title("ITS functional groups")
 plt.tight_layout(); plt.savefig(output_folder / "functional_groups_stacked.png", dpi=300); plt.savefig(output_folder / "functional_groups_stacked.pdf"); plt.close()
 correlations = []
 for group in functional_groups:
     rho, p_value = spearmanr(plot_data[environmental_predictor], plot_data[group])
-    correlations.append({"functional_group": group, "predictor": environmental_predictor, "n_samples": len(plot_data), "spearman_rho": rho, "p_value": p_value})
+    correlations.append({"functional_group": group, "predictor": environmental_predictor, "n_fields": len(plot_data), "spearman_rho": rho, "p_value": p_value})
 correlation_table = pd.DataFrame(correlations)
 correlation_table["BH_FDR"] = multipletests(correlation_table["p_value"], method="fdr_bh")[1]
 correlation_table.to_csv(output_folder / "functional_group_spearman.csv", index=False)
