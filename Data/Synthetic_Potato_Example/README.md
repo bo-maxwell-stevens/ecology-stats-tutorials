@@ -1,6 +1,6 @@
 # Synthetic Potato Example
 
-Every file here is completely fictional and reproducible with `python synthetic_data_generation.py` (seed `20261029`). It contains 60 fictional Danish-style fields, two biological soil samples per field (120 samples), 80 AMF virtual taxa (`VTX_SYN...`), and 200 ITS species hypotheses (`SH_SYN...`). No real DarkDivNet, Apsara, farm, coordinate, or taxon records were used.
+Every file here is completely fictional and reproducible with `python synthetic_data_generation.py` (seed `20261029`). It contains 60 fictional Danish-style fields, two biological soil samples per field (120 samples), 80 AMF virtual taxa (`VTX_SYN...`), and 200 ITS species hypotheses (`SH_SYN...`). No real farm, coordinate, or taxon records were used.
 
 `Final_data_with_diversity_prefixed.csv` contains sample and field IDs, replicate number, fictional coordinates/regions, pH, phosphorus (mg/100 g), magnesium (mg/100 g), C/N, organic carbon (%), moisture (%), management, and 0--100 harvest/storage severity plus qPCR outcomes for black dot (`Cc`) and silver scurf (`Hs`).
 

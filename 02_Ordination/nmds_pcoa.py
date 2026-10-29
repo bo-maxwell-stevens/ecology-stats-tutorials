@@ -19,9 +19,8 @@ from skbio.stats.ordination import pcoa
 # =====================================================
 # USER SETTINGS
 # =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/Synthetic/Ordination") if dataset == "synthetic" else Path("Outputs/Ordination")
+data_folder = Path("Data/Synthetic_Potato_Example")
+output_folder = Path("Outputs/Synthetic/Ordination")
 community_files = {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}
 colour_variable = "pH_KCl"  # Other real numeric choice: P_Mehlich3_mg_100g
 random_seed = 42

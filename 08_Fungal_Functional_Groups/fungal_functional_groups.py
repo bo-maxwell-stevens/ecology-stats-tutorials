@@ -17,8 +17,7 @@ from statsmodels.stats.multitest import multipletests
 # =====================================================
 # USER SETTINGS
 # =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Functional_Groups") if dataset == "synthetic" else Path("Outputs/Functional_Groups")
+data_folder = Path("Data/Synthetic_Potato_Example"); output_folder = Path("Outputs/Synthetic/Functional_Groups")
 environmental_predictor = "pH_KCl"
 functional_groups = {
     "saprotroph": ["soil_saprotroph", "litter_saprotroph", "wood_saprotroph", "dung_saprotroph", "pollen_saprotroph", "nectar/tap_saprotroph"],
@@ -81,7 +80,7 @@ relative_abundance.sum(axis=1).rename("proportion_sum").to_csv(output_folder / "
 # =====================================================
 metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
 plot_data = relative_abundance.join(metadata[[environmental_predictor]]).dropna()
-plot_data.sort_values(environmental_predictor)[list(functional_groups)].plot(kind="bar", stacked=True, figsize=(12, 5), colormap="viridis", width=.9)
+plot_data.sort_values(environmental_predictor)[list(relative_abundance.columns)].plot(kind="bar", stacked=True, figsize=(12, 5), colormap="viridis", width=.9)
 plt.ylabel("Relative read abundance (of all ITS reads)"); plt.xlabel("Sample, ordered by " + environmental_predictor); plt.title("ITS functional groups")
 plt.tight_layout(); plt.savefig(output_folder / "functional_groups_stacked.png", dpi=300); plt.savefig(output_folder / "functional_groups_stacked.pdf"); plt.close()
 correlations = []

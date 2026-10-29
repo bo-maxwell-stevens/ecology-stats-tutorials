@@ -47,6 +47,8 @@ for _, field in field_table.iterrows():
         row.update(sample_id=f"{field.field_id}.N{replicate}", canonical=f"{field.field_id}.N{replicate}", **{"site.id": field.field_id}, biological_replicate=replicate)
         row["pH_KCl"] += rng.normal(0, .10); row["soil_moisture_pct"] += rng.normal(0, 1.5)
         row["alpha"] = np.clip(42 + 5 * row["pH_KCl"] - 1.5 * row["P_Mehlich3_mg_100g"] + rng.normal(0, 8), 5, 100)
+        # A sample-level response with a shared field component for the MixedLM tutorial.
+        row["Sample_fungal_response"] = 25 + 3 * row["pH_KCl"] + 5 * field.field_effect + rng.normal(0, 2)
         metadata_rows.append(row)
 metadata = pd.DataFrame(metadata_rows)
 

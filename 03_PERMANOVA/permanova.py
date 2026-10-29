@@ -14,9 +14,8 @@ import pandas as pd
 # =====================================================
 # USER SETTINGS
 # =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/Synthetic/PERMANOVA") if dataset == "synthetic" else Path("Outputs/PERMANOVA")
+data_folder = Path("Data/Synthetic_Potato_Example")
+output_folder = Path("Outputs/Synthetic/PERMANOVA")
 predictor_columns = ["pH_KCl", "P_Mehlich3_mg_100g"]
 categorical_predictor = None  # Example for potato data: "Crop_rotation". Must have replication in every group.
 permutations = 999

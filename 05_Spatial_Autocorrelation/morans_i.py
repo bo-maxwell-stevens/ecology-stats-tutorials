@@ -17,8 +17,7 @@ from pyproj import Transformer
 # =====================================================
 # USER SETTINGS
 # =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Spatial") if dataset == "synthetic" else Path("Outputs/Spatial")
+data_folder = Path("Data/Synthetic_Potato_Example"); output_folder = Path("Outputs/Synthetic/Spatial")
 variables_to_test = ["ITS_richness", "AMF_richness", "pH_KCl"]
 number_of_neighbours = 6
 sensitivity_neighbours = [4, 6, 8]
@@ -30,7 +29,7 @@ random_seed = 42
 # =====================================================
 output_folder.mkdir(parents=True, exist_ok=True)
 np.random.seed(random_seed)
-metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
+metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=True).first()
 for community, filename in {"ITS": "ITS_OTU_table_final.tsv", "AMF": "AMF_OTU_table_final.tsv"}.items():
     counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
     counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)

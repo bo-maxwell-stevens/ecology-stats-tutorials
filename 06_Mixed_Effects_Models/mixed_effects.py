@@ -1,60 +1,38 @@
-"""
-TOPIC: Multiple linear regression
+"""TOPIC: Field regression and sample-level mixed effects.
 
-WHAT DOES THIS ANALYSIS DO? Relates a numeric response to multiple environmental predictors.
-WHEN SHOULD I USE IT? When observations are independent and the response is approximately Gaussian.
-INPUT: Metadata with a response and predictors. OUTPUT: coefficient table and diagnostics.
-MAIN STATISTIC: Regression coefficients estimate associations while holding the other predictors constant.
+OLS uses one independent row per field. MixedLM uses the two soil samples within
+each field, with a field random intercept so replicates are not treated as fields.
 """
 from pathlib import Path
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import statsmodels.formula.api as smf
 import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
-# =====================================================
 # USER SETTINGS
-# =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Mixed_Models") if dataset == "synthetic" else Path("Outputs/Mixed_Models")
-response_variable = "alpha"  # Replace with fungal diversity or a suitable continuous disease response.
-fixed_effects = ["pH_KCl", "P_Mehlich3_mg_100g"]
+data_folder = Path("Data/Synthetic_Potato_Example")
+output_folder = Path("Outputs/Synthetic/Mixed_Models")
+metadata_file = "Final_data_with_diversity_prefixed.csv"
 
-# =====================================================
-# STEP 1: Load independent observations
-# =====================================================
+# STEP 1: Load field and sample data
 output_folder.mkdir(parents=True, exist_ok=True)
-data = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv")
-model_data = data[[response_variable] + fixed_effects].dropna()
+samples = pd.read_csv(data_folder / metadata_file)
+fields = samples.groupby("site.id", as_index=False).first()
 
-# =====================================================
-# STEP 2: Fit the multiple linear regression
-# =====================================================
-formula = response_variable + " ~ " + " + ".join(fixed_effects)
-model = smf.ols(formula, data=model_data)
-result = model.fit()
-confidence_intervals = result.conf_int()
-pd.DataFrame({"coefficient": result.params, "standard_error": result.bse, "p_value": result.pvalues, "CI_low": confidence_intervals[0], "CI_high": confidence_intervals[1]}).to_csv(output_folder / "mixed_model_coefficients.csv")
+# STEP 2: Ordinary regression: one observation per independent field
+ols = smf.ols("Severity_Har_Cc ~ pH_KCl + C(crop_rotation)", data=fields).fit()
+ols_ci = ols.conf_int()
+pd.DataFrame({"coefficient": ols.params, "standard_error": ols.bse, "p_value": ols.pvalues, "CI_low": ols_ci[0], "CI_high": ols_ci[1]}).to_csv(output_folder / "field_ols_coefficients.csv")
 
-# =====================================================
-# STEP 3: Check model assumptions
-# =====================================================
+# STEP 3: Mixed model: a documented sample-level response, nested within fields
+mixed = smf.mixedlm("Sample_fungal_response ~ pH_KCl + C(management)", samples, groups=samples["site.id"])
+mixed_result = mixed.fit()
+pd.DataFrame({"coefficient": mixed_result.params, "standard_error": mixed_result.bse, "p_value": mixed_result.pvalues}).to_csv(output_folder / "sample_mixedlm_coefficients.csv")
+
+# STEP 4: OLS diagnostic plot
 figure, axes = plt.subplots(1, 2, figsize=(10, 4))
-axes[0].scatter(result.fittedvalues, result.resid, alpha=.7); axes[0].axhline(0, color="firebrick")
-axes[0].set(xlabel="Fitted values", ylabel="Residuals", title="Residuals versus fitted")
-sm.qqplot(result.resid, line="45", ax=axes[1]); axes[1].set_title("Normal Q-Q plot")
-figure.tight_layout(); figure.savefig(output_folder / "mixed_model_diagnostics.png", dpi=300); figure.savefig(output_folder / "mixed_model_diagnostics.pdf")
-print(result.summary())
-
-# =====================================================
-# STEP 4: Synthetic repeated-measures mixed-model example
-# =====================================================
-# This artificial example demonstrates a random intercept. It is not DarkDivNet data.
-rng = np.random.default_rng(42)
-synthetic = pd.DataFrame({"site": np.repeat([f"site_{i}" for i in range(12)], 4), "pH": rng.normal(6, 0.8, 48)})
-site_intercepts = dict(zip(synthetic["site"].unique(), rng.normal(0, 1.5, 12)))
-synthetic["diversity"] = 10 + 1.2 * synthetic["pH"] + synthetic["site"].map(site_intercepts) + rng.normal(0, 1, 48)
-mixed_result = smf.mixedlm("diversity ~ pH", synthetic, groups=synthetic["site"]).fit()
-pd.DataFrame({"coefficient": mixed_result.params, "standard_error": mixed_result.bse, "p_value": mixed_result.pvalues}).to_csv(output_folder / "synthetic_mixed_model_coefficients.csv")
-synthetic.to_csv(output_folder / "synthetic_repeated_measures_data.csv", index=False)
+axes[0].scatter(ols.fittedvalues, ols.resid); axes[0].axhline(0, color="firebrick")
+axes[0].set(xlabel="Fitted severity", ylabel="Residual", title="Field OLS residuals")
+sm.qqplot(ols.resid, line="45", ax=axes[1]); axes[1].set_title("OLS Q-Q plot")
+figure.tight_layout(); figure.savefig(output_folder / "field_ols_diagnostics.png", dpi=300); figure.savefig(output_folder / "field_ols_diagnostics.pdf")
+print(f"OLS: {len(fields)} independent fields. MixedLM: {len(samples)} non-empty samples nested in {samples['site.id'].nunique()} fields.")

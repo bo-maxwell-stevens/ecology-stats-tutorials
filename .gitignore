@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 Data/*.tsv
 Data/*.csv
+Data/*.tsv
+!Data/Synthetic_Potato_Example/*.csv
+!Data/Synthetic_Potato_Example/*.tsv

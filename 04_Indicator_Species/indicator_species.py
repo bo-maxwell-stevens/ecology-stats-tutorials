@@ -15,12 +15,11 @@ import numpy as np
 # =====================================================
 # USER SETTINGS
 # =====================================================
-dataset = "synthetic"
-data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/Synthetic/Indicator_Species") if dataset == "synthetic" else Path("Outputs/Indicator_Species")
+data_folder = Path("Data/Synthetic_Potato_Example")
+output_folder = Path("Outputs/Synthetic/Indicator_Species")
 community_type = "ITS"
 group_source_column = "pH_KCl"
-group_column = "disease_group" if dataset == "synthetic" else None  # Preferred: a predefined categorical disease/management column.
+group_column = "disease_group"  # Predefined teaching group: black-dot harvest severity >= 50.
 use_teaching_median_split = False  # Illustrative only; do not use a median split as a biological threshold.
 minimum_prevalence = 0.10
 permutations = 999
@@ -36,8 +35,7 @@ counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
 counts = counts.groupby("canonical").sum()
 metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=True).first()
 metadata = metadata.loc[counts.index.intersection(metadata.index)].dropna(subset=[group_source_column])
-if dataset == "synthetic":
-    metadata["disease_group"] = np.where(metadata["Severity_Har_Cc"] >= 50, "high_black_dot", "low_black_dot")
+metadata["disease_group"] = np.where(metadata["Severity_Har_Cc"] >= 50, "high_black_dot", "low_black_dot")
 counts = counts.loc[metadata.index]
 zero_reads = counts.sum(axis=1) == 0
 counts, metadata = counts.loc[~zero_reads], metadata.loc[~zero_reads]
@@ -46,8 +44,8 @@ print(f"{community_type}: {len(counts)} sites used; {zero_reads.sum()} zero-read
 # =====================================================
 # STEP 2: Define an example group and filter rare taxa
 # =====================================================
-# DarkDivNet has no replicated management/disease group. This median pH split is a teaching example,
-# not a claim that pH is a natural treatment. Replace with your disease/management grouping.
+# This pre-defined severity threshold is a teaching demonstration. Dichotomising
+# continuous severity loses information; indicator taxa are associations, not causes.
 if group_column:
     metadata["analysis_group"] = metadata[group_column]
 elif use_teaching_median_split:
