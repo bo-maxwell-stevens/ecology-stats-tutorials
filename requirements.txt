@@ -8,3 +8,5 @@ scikit-bio>=0.6,<1
 statsmodels>=0.14,<1
 libpysal>=4.10,<5
 esda>=2.5,<3
+pyproj>=3.7,<4
+jupyterlab>=4.0,<5

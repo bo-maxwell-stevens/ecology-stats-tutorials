@@ -10,11 +10,10 @@ cd ecology-stats-tutorials
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install jupyterlab
 jupyter lab
 ```
 
-On Windows PowerShell activate with `.venv\Scripts\Activate.ps1`. Open `Notebooks/01_Introduction_to_Ecological_Data_Analysis.ipynb`, then run scripts from the repository root, for example `python 01_Diversity/diversity_metrics.py`. R tutorials require `vegan`, `indicspecies`, `iNEXT`, `readr`, and `ggplot2`.
+On Windows PowerShell activate with `.venv\Scripts\Activate.ps1`. Open `Notebooks/01_Introduction_to_Ecological_Data_Analysis.ipynb`, then run scripts from the repository root, for example `python 01_Diversity/diversity_metrics.py`. For R tutorials, install R and run `install.packages(c("vegan", "indicspecies", "iNEXT", "readr", "ggplot2"))` in R.
 
 ## Learning sequence
 

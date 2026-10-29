@@ -4,4 +4,4 @@ Calculates observed richness, Shannon, Hill diversity q = 1 (exponential Shannon
 
 Run: `python 01_Diversity/diversity_metrics.py`, `python 01_Diversity/reads_vs_richness.py`, then optionally `Rscript 01_Diversity/inext_coverage.R`.
 
-`iNEXT` reports coverage-standardised richness at 90% sample coverage, only up to twice each sample's observed reads. A missing result means that target was not reached within that limit. Compare only samples that reach the target. Documentation: [iNEXT](https://cran.r-project.org/package=iNEXT).
+`iNEXT` reports the first richness estimate reaching at least 90% sample coverage, only up to twice each sample's observed reads. It uses zero bootstrap replicates here for a fast descriptive demonstration, so it has no confidence intervals and is not an inferential comparison. A missing result means the target was not reached within that limit. Documentation: [iNEXT](https://cran.r-project.org/package=iNEXT).
