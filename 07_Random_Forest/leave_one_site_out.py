@@ -35,7 +35,7 @@ for train_index, test_index in LeaveOneGroupOut().split(X, y, groups):
     numeric = X.select_dtypes(include="number").columns.tolist()
     categorical = [column for column in predictor_columns if column not in numeric]
     preprocess = ColumnTransformer([("numeric", SimpleImputer(strategy="median"), numeric), ("categorical", Pipeline([("impute", SimpleImputer(strategy="most_frequent")), ("one_hot", OneHotEncoder(handle_unknown="ignore"))]), categorical)])
-    forest = Pipeline([("preprocess", preprocess), ("forest", RandomForestRegressor(n_estimators=500, min_samples_leaf=2, random_state=random_seed, n_jobs=-1))])
+    forest = Pipeline([("preprocess", preprocess), ("forest", RandomForestRegressor(n_estimators=150, min_samples_leaf=2, random_state=random_seed, n_jobs=-1))])
     forest.fit(X.iloc[train_index], y.iloc[train_index])
     predictions.append(pd.DataFrame({"site": groups.iloc[test_index].values, "observed": y.iloc[test_index].values, "predicted": forest.predict(X.iloc[test_index]), "baseline_prediction": y.iloc[train_index].mean()}))
 all_predictions = pd.concat(predictions, ignore_index=True)

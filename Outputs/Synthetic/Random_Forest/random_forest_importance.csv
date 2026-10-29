@@ -1,0 +1,12 @@
+,importance
+categorical__crop_rotation_short_rotation,0.00776958507345391
+categorical__management_conventional,0.00786792389330118
+categorical__management_organic,0.007954545921134785
+categorical__crop_rotation_diverse_rotation,0.012176697349100924
+categorical__crop_rotation_cereal_dominant,0.024732837893434632
+numeric__P_Mehlich3_mg_100g,0.07766516081627081
+numeric__CN_ratio,0.0779927843393604
+numeric__Mg_mg_100g,0.10779500308225122
+numeric__SOC_pct,0.12510261135250747
+numeric__soil_moisture_pct,0.2285488885700195
+numeric__pH_KCl,0.322393961709165

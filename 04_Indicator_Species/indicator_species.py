@@ -10,16 +10,18 @@ from pathlib import Path
 import subprocess
 import pandas as pd
 import numpy as np
+import numpy as np
 
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data")
-output_folder = Path("Outputs/Indicator_Species")
+dataset = "synthetic"
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
+output_folder = Path("Outputs/Synthetic/Indicator_Species") if dataset == "synthetic" else Path("Outputs/Indicator_Species")
 community_type = "ITS"
 group_source_column = "pH_KCl"
-group_column = None  # Preferred: a predefined categorical disease/management column.
-use_teaching_median_split = True  # Illustrative only; do not use a median split as a biological threshold.
+group_column = "disease_group" if dataset == "synthetic" else None  # Preferred: a predefined categorical disease/management column.
+use_teaching_median_split = False  # Illustrative only; do not use a median split as a biological threshold.
 minimum_prevalence = 0.10
 permutations = 999
 random_seed = 42
@@ -32,8 +34,10 @@ filename = {"ITS": "ITS_OTU_table_final.tsv", "AMF": "AMF_OTU_table_final.tsv"}[
 counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
 counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
 counts = counts.groupby("canonical").sum()
-metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
+metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=True).first()
 metadata = metadata.loc[counts.index.intersection(metadata.index)].dropna(subset=[group_source_column])
+if dataset == "synthetic":
+    metadata["disease_group"] = np.where(metadata["Severity_Har_Cc"] >= 50, "high_black_dot", "low_black_dot")
 counts = counts.loc[metadata.index]
 zero_reads = counts.sum(axis=1) == 0
 counts, metadata = counts.loc[~zero_reads], metadata.loc[~zero_reads]

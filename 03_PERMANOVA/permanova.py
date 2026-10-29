@@ -16,7 +16,7 @@ import pandas as pd
 # =====================================================
 dataset = "synthetic"
 data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/PERMANOVA")
+output_folder = Path("Outputs/Synthetic/PERMANOVA") if dataset == "synthetic" else Path("Outputs/PERMANOVA")
 predictor_columns = ["pH_KCl", "P_Mehlich3_mg_100g"]
 categorical_predictor = None  # Example for potato data: "Crop_rotation". Must have replication in every group.
 permutations = 999
@@ -27,7 +27,7 @@ permutation_block_column = None  # Set only for a documented repeated-sample blo
 # STEP 1: Load data and match independent sampling units
 # =====================================================
 output_folder.mkdir(parents=True, exist_ok=True)
-metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
+metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").groupby("site.id", as_index=True).first()
 for community_name, filename in {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}.items():
     counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
     counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)

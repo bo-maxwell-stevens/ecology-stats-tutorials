@@ -61,10 +61,13 @@ def community(n_taxa, prefix, depth_values, disease_direction):
     base = rng.dirichlet(np.linspace(3, .15, n_taxa))
     taxon_pH = rng.normal(0, .22, n_taxa); taxon_disease = rng.normal(0, .12, n_taxa)
     taxon_disease[:5] = disease_direction * .55; taxon_disease[5:10] = -disease_direction * .45
+    # Each field has a taxon-specific composition shift shared by its two soil samples.
+    # Unlike one common constant, this does not cancel when relative abundances are normalized.
+    field_taxon_effects = rng.normal(0, .85, (N_FIELDS, n_taxa))
     table = []
     for sample_index, sample in metadata.iterrows():
-        field_noise = field_table.loc[field_table.field_id == sample["site.id"], "field_effect"].iloc[0]
-        log_abundance = np.log(base + 1e-12) + taxon_pH * (sample.pH_KCl - 6) + taxon_disease * ((sample.Severity_Har_Cc - 35) / 20) + field_noise + rng.normal(0, .30, n_taxa)
+        field_index = int(sample["site.id"].split("_")[1]) - 1
+        log_abundance = np.log(base + 1e-12) + taxon_pH * (sample.pH_KCl - 6) + taxon_disease * ((sample.Severity_Har_Cc - 35) / 20) + field_taxon_effects[field_index] + rng.normal(0, .10, n_taxa)
         probabilities = np.exp(log_abundance - log_abundance.max()); probabilities /= probabilities.sum()
         table.append(rng.multinomial(depth_values[sample_index], probabilities))
     return pd.DataFrame(table, index=metadata.sample_id, columns=[f"{prefix}{i:03d}" for i in range(1, n_taxa + 1)])

@@ -47,7 +47,8 @@ preprocessing = ColumnTransformer([
     ("numeric", SimpleImputer(strategy="median"), numeric_columns),
     ("categorical", Pipeline([("impute", SimpleImputer(strategy="most_frequent")), ("one_hot", OneHotEncoder(handle_unknown="ignore"))]), categorical_columns),
 ])
-model = Pipeline([("preprocessing", preprocessing), ("forest", RandomForestRegressor(n_estimators=500, min_samples_leaf=2, random_state=random_seed, n_jobs=-1))])
+# Quick teaching mode: fixed modest forest; tune only inside grouped training folds for final work.
+model = Pipeline([("preprocessing", preprocessing), ("forest", RandomForestRegressor(n_estimators=150, min_samples_leaf=2, random_state=random_seed, n_jobs=-1))])
 model.fit(X_train, y_train)
 
 # =====================================================

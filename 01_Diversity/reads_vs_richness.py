@@ -18,7 +18,7 @@ from scipy.stats import spearmanr
 # =====================================================
 dataset = "synthetic"
 data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/Diversity")
+output_folder = Path("Outputs/Synthetic/Diversity") if dataset == "synthetic" else Path("Outputs/Diversity")
 community_files = {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}
 
 # =====================================================

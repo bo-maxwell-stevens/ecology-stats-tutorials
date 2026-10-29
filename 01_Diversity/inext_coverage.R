@@ -4,7 +4,7 @@ library(iNEXT)
 library(readr)
 library(ggplot2)
 
-input_file <- "Data/ITS_OTU_table_final.tsv"  # Change to AMF_OTU_table_final.tsv if wanted.
+input_file <- "Data/Synthetic_Potato_Example/ITS_OTU_table_final.tsv"  # Change to Data/ITS_OTU_table_final.tsv for permitted DarkDivNet data.
 output_file <- "Outputs/Diversity/ITS_inext_coverage.csv"
 target_coverage <- 0.90
 n_bootstrap <- 0  # Point estimates only: much faster for many high-dimensional community samples.

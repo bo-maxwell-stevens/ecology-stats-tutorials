@@ -21,7 +21,7 @@ from skbio.stats.ordination import pcoa
 # =====================================================
 dataset = "synthetic"
 data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
-output_folder = Path("Outputs/Ordination")
+output_folder = Path("Outputs/Synthetic/Ordination") if dataset == "synthetic" else Path("Outputs/Ordination")
 community_files = {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}
 colour_variable = "pH_KCl"  # Other real numeric choice: P_Mehlich3_mg_100g
 random_seed = 42
@@ -33,7 +33,9 @@ aggregate_to_site = True  # Required for supplied site-level metadata; do not as
 output_folder.mkdir(parents=True, exist_ok=True)
 sns.set_theme(style="whitegrid", context="talk")
 # `site.id` (for example D018) matches a sequencing ID after its .N# suffix is removed.
-metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
+metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv")
+# Field-level ordination needs one metadata row per field; field predictors are shared by replicates.
+metadata = metadata.groupby("site.id", as_index=True).first()
 for community_name, filename in community_files.items():
     counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
     if aggregate_to_site:
