@@ -1,6 +1,6 @@
 # Alpha diversity
 
-Calculates observed richness, Shannon, Pielou evenness, Simpson, inverse Simpson, effective species number, and read depth. Use it for independent community samples. Richness is sensitive to sequencing depth, so inspect `reads_vs_richness.py` before interpreting differences.
+Calculates observed richness, Shannon, Pielou evenness, Simpson, inverse Simpson, and read depth. Use it for independent community samples. Richness is sensitive to sequencing depth, so inspect `reads_vs_richness.py` before interpreting differences.
 
 Run: `python 01_Diversity/diversity_metrics.py`, `python 01_Diversity/reads_vs_richness.py`, then optionally `Rscript 01_Diversity/inext_coverage.R`.
 

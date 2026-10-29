@@ -51,7 +51,6 @@ for community_name, filename in community_files.items():
         "total_reads": total_reads, "observed_richness": richness,
         "shannon": shannon, "pielou_evenness": evenness,
         "simpson": simpson, "inverse_simpson": inverse_simpson,
-        "effective_species_number": np.exp(shannon),
     })
     summary.to_csv(output_folder / f"{community_name}_diversity_summary.csv", index=False)
     all_summaries.append(summary)
