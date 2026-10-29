@@ -8,9 +8,37 @@ Undergraduate and graduate students, and researchers learning ecological statist
 
 ## Installation
 
+### WSL on Windows
+
+WSL lets Windows users run the Linux commands used below. Open **PowerShell as Administrator** and install Ubuntu:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Restart when Windows asks, open the Ubuntu application, and create a Linux username and password. In Ubuntu, install Python, Git, and the virtual-environment tools:
+
 ```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip git
+```
+
+Clone the repository into your Linux home directory (for example, `~/projects`), rather than a Windows-mounted path such as `/mnt/c/...`; this is usually faster and avoids file-permission problems:
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
 git clone https://github.com/bo-maxwell-stevens/ecology-stats-tutorials.git
-cd ecological-statistics-tutorials
+cd ecology-stats-tutorials
+```
+
+If the input tables are on Windows, they are available in WSL under `/mnt/c/`. Copy permitted files into this repository's `Data/` directory before running an analysis.
+
+### Python environment
+
+From the repository directory, create and activate the environment, then install packages:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -28,6 +56,12 @@ The repository includes generated example outputs but not raw DarkDivNet input t
 ```r
 install.packages(c("vegan", "indicspecies", "iNEXT"))
 ```
+
+## Included output status
+
+`Outputs/` contains the verified diversity, ordination, Moran's I, Random Forest, and fungal-functional-group results generated from the available DarkDivNet tables. It also contains prepared inputs for PERMANOVA and indicator species analysis.
+
+PERMANOVA, iNEXT, and `indicspecies` results are not included because R/Rscript was unavailable in the execution environment. The mixed-effects model correctly produced no result: every environmental `site.id` occurs once, so a site-level random intercept cannot be estimated. Install R and the packages above, then rerun those scripts after copying the input tables to generate their results.
 
 ## Getting started
 
