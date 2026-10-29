@@ -1,0 +1,52 @@
+"""
+TOPIC: Multivariable PERMANOVA
+
+WHAT DOES THIS ANALYSIS DO? Tests whether predictors are associated with community composition.
+WHEN SHOULD I USE IT? For independent samples with a community table and predictors.
+INPUT: AMF/ITS counts and metadata. OUTPUT: adonis2 and dispersion tables.
+MAIN STATISTIC: Pseudo-F compares among-predictor to residual multivariate variation.
+"""
+from pathlib import Path
+import subprocess
+import pandas as pd
+
+# =====================================================
+# USER SETTINGS
+# =====================================================
+data_folder = Path("Data")
+output_folder = Path("Outputs/PERMANOVA")
+predictor_columns = ["pH_KCl", "P_Mehlich3_mg_100g"]
+categorical_predictor = None  # Example for potato data: "Crop_rotation". Must have replication in every group.
+permutations = 999
+
+# =====================================================
+# STEP 1: Load data and match independent sampling units
+# =====================================================
+output_folder.mkdir(parents=True, exist_ok=True)
+metadata = pd.read_csv(data_folder / "Final_data_with_diversity_prefixed.csv").set_index("site.id")
+for community_name, filename in {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}.items():
+    counts = pd.read_csv(data_folder / filename, sep="\t", index_col=0).apply(pd.to_numeric, errors="coerce").fillna(0)
+    counts["canonical"] = counts.index.str.replace(r"\.N\d+$", "", regex=True)
+    counts = counts.groupby("canonical").sum()
+    model_columns = predictor_columns + ([categorical_predictor] if categorical_predictor else [])
+    selected_metadata = metadata.loc[counts.index.intersection(metadata.index), model_columns].dropna()
+    selected_counts = counts.loc[selected_metadata.index]
+
+    # =====================================================
+    # STEP 2: Write aligned inputs for vegan::adonis2
+    # =====================================================
+    selected_counts.to_csv(output_folder / f"{community_name}_community_for_R.csv")
+    selected_metadata.to_csv(output_folder / f"{community_name}_metadata_for_R.csv")
+
+    # =====================================================
+    # STEP 3: Run multivariable PERMANOVA in R
+    # =====================================================
+    # adonis2 is used because it performs one multivariable model, unlike separate one-factor tests.
+    command = ["Rscript", "03_PERMANOVA/permanova.R", community_name, str(output_folder), ",".join(model_columns), str(permutations), categorical_predictor or "NONE"]
+    try:
+        subprocess.run(command, check=True)
+    except FileNotFoundError:
+        print("Rscript is unavailable. Install R, vegan, then rerun; aligned inputs were saved.")
+    except subprocess.CalledProcessError:
+        print(f"vegan failed for {community_name}. Check predictors, replication, and the R error above.")
+print("Null hypothesis: communities are unrelated to the listed predictors after the other model terms.")
