@@ -1,0 +1,4 @@
+functional_group,predictor,n_samples,spearman_rho,p_value
+saprotroph,pH_KCl,98,-0.29333061317993386,0.003375054823518607
+symbiotroph,pH_KCl,98,-0.13565751856520644,0.1829008725534433
+putative_pathogen,pH_KCl,98,0.4120731814817811,2.4880570876406056e-05

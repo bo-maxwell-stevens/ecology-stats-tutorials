@@ -1,6 +1,6 @@
 # Ecological Statistics Tutorials
 
-Beginner-friendly Python examples for common microbial-ecology analyses. The examples use the DarkDivNet table layout locally, but every script starts with settings you can change for another study. Educational clarity takes priority over sophisticated modelling.
+Beginner-friendly Python examples for common microbial-ecology analyses. The examples use the DarkDivNet table layout locally, but every script starts with settings you can change for another study.
 
 ## Who is this for?
 
@@ -9,14 +9,21 @@ Undergraduate and graduate students, and researchers learning ecological statist
 ## Installation
 
 ```bash
-git clone YOUR-REPOSITORY-URL ecological-statistics-tutorials
+git clone https://github.com/bo-maxwell-stevens/ecology-stats-tutorials.git
 cd ecological-statistics-tutorials
 python3 -m venv .venv
-source .venv/bin/activate              # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-Copy permitted input tables as described in [`Data/README.md`](Data/README.md). Tutorials 03 and 04 use R because `vegan::adonis2` and `indicspecies::multipatt` are the established implementations:
+On Windows PowerShell, activate the environment with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+The repository includes generated example outputs but not raw DarkDivNet input tables. To run the scripts, copy permitted input tables into `Data/` as described in [`Data/README.md`](Data/README.md). Tutorials 01, 03, and 04 also require R because they use established R implementations:
 
 ```r
 install.packages(c("vegan", "indicspecies", "iNEXT"))
@@ -51,8 +58,4 @@ Correlation is not causation. Avoid pseudoreplication: samples from one field ar
 
 ## Reproducibility
 
-All scripts set a random seed and save CSV results plus 300 dpi PNG and PDF figures under `Outputs/`. Raw data and outputs are ignored by Git. Package versions are bounded in `requirements.txt`; record the exact environment with `pip freeze > requirements-lock.txt` for a publication.
-
-## License
-
-The code is MIT licensed. This license does not grant rights to third-party datasets.
+All scripts set a random seed and save CSV results plus 300 dpi PNG and PDF figures under `Outputs/`. The verified example outputs are versioned; raw input tables remain excluded. Package versions are bounded in `requirements.txt`; record the exact environment with `pip freeze > requirements-lock.txt` for a publication.
