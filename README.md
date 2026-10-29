@@ -8,6 +8,10 @@ Undergraduate and graduate students, and researchers learning ecological statist
 
 ## Installation
 
+### Why use WSL and a virtual environment?
+
+WSL is optional, but it gives Windows users a Linux environment that works smoothly with the command-line tools, Python packages, R, and scientific dependencies used in these tutorials. A Python virtual environment keeps this project's package versions separate from other Python projects, reducing version conflicts and making analyses easier to reproduce. All tutorial scripts use paths relative to the repository root, so after setup they run from this directory; no tutorial code is stored in a temporary directory.
+
 ### WSL on Windows
 
 WSL lets Windows users run the Linux commands used below. Open **PowerShell as Administrator** and install Ubuntu:
