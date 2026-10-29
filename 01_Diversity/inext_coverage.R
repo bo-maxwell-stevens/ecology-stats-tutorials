@@ -5,7 +5,7 @@ library(readr)
 library(ggplot2)
 
 input_file <- "Data/Synthetic_Potato_Example/ITS_OTU_table_final.tsv"  # Change to Data/ITS_OTU_table_final.tsv for permitted DarkDivNet data.
-output_file <- "Outputs/Diversity/ITS_inext_coverage.csv"
+output_file <- "Outputs/Synthetic/Diversity/ITS_inext_coverage.csv"
 target_coverage <- 0.90
 n_bootstrap <- 0  # Point estimates only: much faster for many high-dimensional community samples.
 
@@ -19,7 +19,7 @@ if (any(!is.finite(count_matrix)) || any(count_matrix < 0)) stop("Count table mu
 sample_list <- lapply(seq_len(nrow(count_matrix)), function(i) count_matrix[i, count_matrix[i, ] > 0])
 names(sample_list) <- sample_ids
 nonempty <- lengths(sample_list) > 0
-if (any(!nonempty)) write_csv(data.frame(sample_id = sample_ids[!nonempty], reason = "zero_reads"), "Outputs/Diversity/ITS_inext_zero_read_excluded.csv")
+if (any(!nonempty)) write_csv(data.frame(sample_id = sample_ids[!nonempty], reason = "zero_reads"), "Outputs/Synthetic/Diversity/ITS_inext_zero_read_excluded.csv")
 sample_list <- sample_list[nonempty]
 
 # The endpoint is twice each sample's observed read depth. Samples that do not
@@ -49,6 +49,6 @@ if (nrow(plot_data) > 0) {
     geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
     labs(x = "Observed richness", y = "Richness at 90% coverage", title = "Observed and coverage-standardized richness") +
     theme_bw()
-  ggsave("Outputs/Diversity/ITS_observed_vs_coverage_richness.png", plot, width = 7, height = 5, dpi = 300)
-  ggsave("Outputs/Diversity/ITS_observed_vs_coverage_richness.pdf", plot, width = 7, height = 5)
+  ggsave("Outputs/Synthetic/Diversity/ITS_observed_vs_coverage_richness.png", plot, width = 7, height = 5, dpi = 300)
+  ggsave("Outputs/Synthetic/Diversity/ITS_observed_vs_coverage_richness.pdf", plot, width = 7, height = 5)
 }
