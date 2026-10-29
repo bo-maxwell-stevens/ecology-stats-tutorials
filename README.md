@@ -69,6 +69,22 @@ The original random-intercept mixed model was not appropriate because every envi
 
 ## Getting started
 
+## Start Here: Beginner Tutorial
+
+The default `dataset = "synthetic"` setting uses `Data/Synthetic_Potato_Example/`, a completely fictional 60-field potato-soil dataset. It is safe to use without private research data. Install JupyterLab and open the first notebook:
+
+```bash
+git clone https://github.com/bo-maxwell-stevens/ecology-stats-tutorials.git
+cd ecology-stats-tutorials
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install jupyterlab
+jupyter lab
+```
+
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`. Open `Notebooks/01_Introduction_to_Ecological_Data_Analysis.ipynb`, then run scripts from the repository root. Synthetic figures and tables are written under `Outputs/Synthetic/`. Set `dataset = "darkdivnet"` only after placing permitted private tables in `Data/`; do not interpret synthetic outputs as research results.
+
 Run `01_Diversity/diversity_metrics.py` first. It creates diversity values from count data, which are used by later examples. Run scripts from the repository root, for example `python 02_Ordination/nmds_pcoa.py`.
 
 | Tutorial | Statistical method | Research question |

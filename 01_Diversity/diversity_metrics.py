@@ -19,8 +19,9 @@ import seaborn as sns
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data")
-output_folder = Path("Outputs/Diversity")
+dataset = "synthetic"  # Change to "darkdivnet" after placing permitted private files in Data/.
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data")
+output_folder = Path("Outputs/Synthetic/Diversity") if dataset == "synthetic" else Path("Outputs/Diversity")
 community_files = {"AMF": "AMF_OTU_table_final.tsv", "ITS": "ITS_OTU_table_final.tsv"}
 aggregate_to_site = False  # Keep sequencing libraries separate unless replicate status is known.
 

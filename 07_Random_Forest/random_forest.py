@@ -21,9 +21,10 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data"); output_folder = Path("Outputs/Random_Forest")
+dataset = "synthetic"
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Random_Forest") if dataset == "synthetic" else Path("Outputs/Random_Forest")
 response_variable = "alpha"
-predictor_columns = ["pH_KCl", "P_Mehlich3_mg_100g", "K_Mehlich3_mg_100g", "N_pct", "C_pct", "bio12now.100"]
+predictor_columns = ["pH_KCl", "P_Mehlich3_mg_100g", "Mg_mg_100g", "CN_ratio", "SOC_pct", "soil_moisture_pct", "crop_rotation", "management"] if dataset == "synthetic" else ["pH_KCl", "P_Mehlich3_mg_100g", "K_Mehlich3_mg_100g", "N_pct", "C_pct", "bio12now.100"]
 group_column = "site.id"  # Use field ID when samples are nested within fields.
 random_seed = 42
 

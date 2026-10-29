@@ -16,7 +16,8 @@ import statsmodels.api as sm
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data"); output_folder = Path("Outputs/Mixed_Models")
+dataset = "synthetic"
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Mixed_Models") if dataset == "synthetic" else Path("Outputs/Mixed_Models")
 response_variable = "alpha"  # Replace with fungal diversity or a suitable continuous disease response.
 fixed_effects = ["pH_KCl", "P_Mehlich3_mg_100g"]
 

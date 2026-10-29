@@ -9,6 +9,7 @@ MAIN STATISTIC: IndVal.g combines a taxon's specificity and fidelity to a group.
 from pathlib import Path
 import subprocess
 import pandas as pd
+import numpy as np
 
 # =====================================================
 # USER SETTINGS

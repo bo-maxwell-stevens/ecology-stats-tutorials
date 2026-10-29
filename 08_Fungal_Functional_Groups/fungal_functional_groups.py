@@ -17,7 +17,8 @@ from statsmodels.stats.multitest import multipletests
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data"); output_folder = Path("Outputs/Functional_Groups")
+dataset = "synthetic"
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Functional_Groups") if dataset == "synthetic" else Path("Outputs/Functional_Groups")
 environmental_predictor = "pH_KCl"
 functional_groups = {
     "saprotroph": ["soil_saprotroph", "litter_saprotroph", "wood_saprotroph", "dung_saprotroph", "pollen_saprotroph", "nectar/tap_saprotroph"],

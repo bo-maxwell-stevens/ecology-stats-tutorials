@@ -17,7 +17,8 @@ from pyproj import Transformer
 # =====================================================
 # USER SETTINGS
 # =====================================================
-data_folder = Path("Data"); output_folder = Path("Outputs/Spatial")
+dataset = "synthetic"
+data_folder = Path("Data/Synthetic_Potato_Example") if dataset == "synthetic" else Path("Data"); output_folder = Path("Outputs/Synthetic/Spatial") if dataset == "synthetic" else Path("Outputs/Spatial")
 variables_to_test = ["ITS_richness", "AMF_richness", "pH_KCl"]
 number_of_neighbours = 6
 sensitivity_neighbours = [4, 6, 8]
