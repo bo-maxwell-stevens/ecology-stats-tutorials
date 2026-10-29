@@ -59,9 +59,9 @@ install.packages(c("vegan", "indicspecies", "iNEXT"))
 
 ## Included output status
 
-`Outputs/` contains the verified diversity, ordination, Moran's I, Random Forest, and fungal-functional-group results generated from the available DarkDivNet tables. It also contains prepared inputs for PERMANOVA and indicator species analysis.
+`Outputs/` contains the verified diversity, iNEXT coverage-standardisation, ordination, PERMANOVA, indicator-species, Moran's I, linear-regression, Random Forest, and fungal-functional-group results generated from the available DarkDivNet tables.
 
-PERMANOVA, iNEXT, and `indicspecies` results are not included because R/Rscript was unavailable in the execution environment. The mixed-effects model correctly produced no result: every environmental `site.id` occurs once, so a site-level random intercept cannot be estimated. Install R and the packages above, then rerun those scripts after copying the input tables to generate their results.
+The original random-intercept mixed model was not appropriate because every environmental `site.id` occurs once. Tutorial 06 therefore uses ordinary multiple linear regression. A future dataset with genuine repeated observations within site or field may support a random-intercept model.
 
 ## Getting started
 
@@ -74,7 +74,7 @@ Run `01_Diversity/diversity_metrics.py` first. It creates diversity values from 
 | 03 | PERMANOVA | Which predictors are associated with composition? |
 | 04 | Indicator species | Which taxa are associated with groups? |
 | 05 | Moran's I | Are observations spatially autocorrelated? |
-| 06 | Mixed-effects models | How do predictors relate to a response with grouped observations? |
+| 06 | Linear regression | How do environmental predictors relate to a continuous response? |
 | 07 | Random Forest | Can we predict ecological responses? |
 | 08 | Functional groups | How do fungal ecological groups vary? |
 

@@ -5,7 +5,7 @@ groups <- read.csv(file.path(output_folder, "groups_for_R.csv"), row.names = 1)$
 result <- multipatt(community, groups, func = "IndVal.g", duleg = TRUE, control = how(nperm = permutations))
 table <- result$sign
 table$taxon <- rownames(table); table$FDR <- p.adjust(table$p.value, method = "BH")
-table$associated_group <- apply(table[, grep("^s\\.", names(table)), drop = FALSE], 1, function(x) paste(names(x)[x > 0], collapse = ";"))
+table$associated_group <- apply(table[, grep("^s\\.", names(table)), drop = FALSE], 1, function(x) paste(sub("^s\\.", "", names(x)[x > 0]), collapse = ";"))
 write.csv(table, file.path(output_folder, "indicator_species_results.csv"), row.names = FALSE)
 significant <- table[table$FDR < 0.05, ]
 if (nrow(significant) > 0) {
